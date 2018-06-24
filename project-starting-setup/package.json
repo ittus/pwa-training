@@ -4,7 +4,7 @@
   "description": "A complete guide to PWAs. Building a simple Instagram clone.",
   "main": "index.js",
   "scripts": {
-    "start": "http-server -c-1 -p 3000"
+    "start": "http-server -c-1"
   },
   "keywords": [
     "pwa",
@@ -14,7 +14,7 @@
     "complete",
     "tutorial"
   ],
-  "author": "Vu Minh Thang",
+  "author": "Maximilian Schwarzmüller",
   "license": "ISC",
   "devDependencies": {
     "http-server": "^0.10.0"
