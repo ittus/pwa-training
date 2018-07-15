@@ -21,3 +21,12 @@ function readAllData(st) {
 
   })
 }
+
+function clearAllData(st) {
+  return dbPromise.then(db => {
+    var tx = db.transaction(st, 'readwrite');
+    var store = tx.objectStore(st);
+    store.clear();
+    return tx.complete;
+  })
+}

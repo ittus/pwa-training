@@ -79,12 +79,13 @@ self.addEventListener('fetch', function(event) {
       fetch(event.request)
         .then(res => {
           var clonedRes = res.clone();
-          clonedRes.json()
-            .then(data => {
-              for (let key in data) {
-                writeData('posts', data[key]);
-              }
-            })
+          clearAllData('posts').then(() => {
+            return clonedRes.json();
+          }).then((data) => {
+            for (let key in data) {
+              writeData('posts', data[key]);
+            }
+          })
           return res;
         })
     );
