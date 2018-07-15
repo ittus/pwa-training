@@ -1,4 +1,4 @@
-var CACHE_STATIC_NAME = 'static-v14'
+var CACHE_STATIC_NAME = 'static-v17'
 var CACHE_DYNAMIC_NAME = 'dynamic-v2'
 
 var STATIC_FILES =[
@@ -69,7 +69,7 @@ function isInArray(string, array) {
   return array.indexOf(cachePath) > -1;
 }
 self.addEventListener('fetch', function(event) {
-  var url = 'https://httpbin.org/get'
+  var url = 'https://try-pwa-73a1a.firebaseio.com/posts'
   if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
       caches.open(CACHE_DYNAMIC_NAME)
