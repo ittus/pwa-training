@@ -123,7 +123,7 @@ if ('indexedDB' in window) {
 }
 
 function sendData() {
-  fetch(url, {
+  fetch('https://us-central1-try-pwa-73a1a.cloudfunctions.net/storePostData', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
