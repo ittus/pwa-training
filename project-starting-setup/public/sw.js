@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-var CACHE_STATIC_NAME = 'static-v22'
+var CACHE_STATIC_NAME = 'static-v23'
 var CACHE_DYNAMIC_NAME = 'dynamic-v2'
 
 var STATIC_FILES =[
@@ -180,3 +180,40 @@ self.addEventListener('fetch', function(event) {
 //     fetch(event.request)
 //   );
 // });
+
+
+self.addEventListener('sync', function(event) {
+  console.log('[Service Worker] Background syncing', event)
+  if (event.tag === 'sync-new-posts') {
+    console.log('[Service Worker] Syncing new posts');
+    event.waitUntil(
+      readAllData('sync-posts')
+        .then(data => {
+          for (var dt of data) {
+            fetch('https://try-pwa-73a1a.firebaseio.com/posts.json', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify({
+                id: dt.id,
+                title: dt.title,
+                location: dt.location,
+                image: "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=477ae5a62fd5ade3f1e3a08c013af882&auto=format&fit=crop&w=1352&q=80"
+              })
+            })
+            .then(res => {
+              console.log('Sent data', res);
+              if (res.ok) {
+                deleteItemFromData('sync-posts', dt.id); // TODO: Fix it
+              }
+            })
+            .catch(err => {
+              console.log('Error while sending data', err);
+            })
+          }
+        })
+    );
+  }
+})
