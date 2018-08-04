@@ -24,10 +24,35 @@ window.addEventListener('beforeinstallprompt', function(event) {
 });
 
 function displayConfirmNotification() {
-  var options = {
-    body: 'You successfully subscribled your notification service!'
-  };
-  new Notification('Successfully subscribed!', options);
+  if ('serviceWorker' in navigator) {
+    var options = {
+      body: 'You successfully subscribled your notification service!',
+      icon: '/src/images/icons/app-icon-96x96.png',
+      image: '/src/images/sf-boat.jpg',
+      dir: 'ltr',
+      lang: 'en-US',
+      vibrate: [100, 50, 200],
+      badge: '/src/images/icons/app-icon-96x96.png',
+      tag: 'confirm-notification',
+      renotify: true,
+      actions: [
+        {
+          action: 'confirm',
+          title: 'Okay',
+          icon: '/src/images/icons/app-icon-96x96.png'
+        },
+        {
+          action: 'cancel',
+          title: 'Cancel',
+          icon: '/src/images/icons/app-icon-96x96.png'
+        }
+      ]
+    };
+    navigator.serviceWorker.ready
+      .then(function(swreq) {
+        swreq.showNotification('Successfully subscribed (SW)!', options);
+      });
+  }
 }
 
 function askForNotificationPermission() {
