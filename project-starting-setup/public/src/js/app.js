@@ -50,9 +50,53 @@ function displayConfirmNotification() {
     };
     navigator.serviceWorker.ready
       .then(function(swreq) {
-        swreq.showNotification('Successfully subscribed (SW)!', options);
+        swreq.showNotification('Successfully subscribed!', options);
       });
   }
+}
+
+function configurePushSub() {
+  if (!('serviceWorker' in navigator)) {
+    return;
+  }
+  var reg;
+
+  navigator.serviceWorker.ready
+    .then(function(swreq) {
+      reg = swreq;
+      return swreq.pushManager.getSubscription();
+    })
+    .then(function(sub) {
+      if (sub === null) {
+        // create new subscription
+        var vapidPublicKey = "BF7nFPba2LicRT9d-YFdEURzQjmn6ea8DRpuFVS6U_LypcWf9pbVeHmSneo5JMYvbnyrDJKZUCDc2l9f2nCZjVc";
+        var convertedPublicKey = urlBase64ToUint8Array(vapidPublicKey);
+        return reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedPublicKey
+        });
+      } else {
+        // already have subscription
+      }
+    })
+    .then(function(newSub) {
+      return fetch('https://try-pwa-73a1a.firebaseio.com/subscriptions.json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(newSub)
+      })
+    })
+    .then(function(res) {
+      if (res.ok) {
+        displayConfirmNotification();
+      }
+    })
+    .catch(function(err) {
+      console.error(err);
+    })
 }
 
 function askForNotificationPermission() {
@@ -61,12 +105,13 @@ function askForNotificationPermission() {
     if (result !== 'granted') {
       console.log('No notification permission granted!');
     } else {
-      displayConfirmNotification()
+      // displayConfirmNotification()
+      configurePushSub();
     }
   });
 }
 
-if ('Notification' in window) {
+if ('Notification' in window && 'serviceWorker' in navigator) {
   for (var i = 0; i < enableNotificationButtons.length; i++) {
     enableNotificationButtons[i].style.display = 'inline-block';
     enableNotificationButtons[i].addEventListener('click', askForNotificationPermission);
