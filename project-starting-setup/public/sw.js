@@ -1,14 +1,15 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-var CACHE_STATIC_NAME = 'static-v29'
-var CACHE_DYNAMIC_NAME = 'dynamic-v2'
+var CACHE_STATIC_NAME = 'static-v31'
+var CACHE_DYNAMIC_NAME = 'dynamic-v3'
 
 var STATIC_FILES =[
   '/',
   '/index.html',
   '/offline.html',
   '/src/js/app.js',
+  '/src/js/utility.js',
   '/src/js/feed.js',
   '/src/js/idb.js',
   '/src/js/promise.js',
@@ -190,18 +191,14 @@ self.addEventListener('sync', function(event) {
       readAllData('sync-posts')
         .then(data => {
           for (var dt of data) {
+            var postData = new FormData();
+            postData.append('id', dt.id);
+            postData.append('title', dt.title);
+            postData.append('location', dt.location);
+            postData.append('file', dt.picture, dt.id + '.png');
             fetch('https://us-central1-try-pwa-73a1a.cloudfunctions.net/storePostData', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-              },
-              body: JSON.stringify({
-                id: dt.id,
-                title: dt.title,
-                location: dt.location,
-                image: "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=477ae5a62fd5ade3f1e3a08c013af882&auto=format&fit=crop&w=1352&q=80"
-              })
+              body: postData
             })
             .then(res => {
               console.log('Sent data', res);
