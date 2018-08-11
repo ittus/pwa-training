@@ -69,10 +69,6 @@ workbox.routing.registerRoute(function(routeData) {
 workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute([
   {
-    "url": "404.html",
-    "revision": "0a27a4163254fc8fce870c8cc3a3f94f"
-  },
-  {
     "url": "favicon.ico",
     "revision": "2cab47d9e04d664d93c8d91aec59e812"
   },

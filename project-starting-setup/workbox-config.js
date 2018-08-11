@@ -7,6 +7,7 @@ module.exports = {
   "swSrc": "public/sw-base.js",
   "swDest": "public/service-worker.js",
   "globIgnores": [
-    "help/**"
+    "help/**",
+    "404.html"
   ]
 };
