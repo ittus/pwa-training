@@ -6,7 +6,7 @@ workbox.routing.registerRoute(/.*(googleapis|gstatic)\.com.*$/, workbox.strategi
   cacheName: 'google-fonts',
   plugins: [
     new workbox.expiration.Plugin({
-      maxEntries: 3,
+      maxEntries: 10,
       maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
     })
   ]
@@ -130,7 +130,7 @@ workbox.precaching.precacheAndRoute([
   },
   {
     "url": "sw-base.js",
-    "revision": "bd191cd77ba0131ba936df892e1e59f5"
+    "revision": "8c7e8e2f1b487b39357cbba5a31b9237"
   },
   {
     "url": "sw.js",
@@ -153,3 +153,94 @@ workbox.precaching.precacheAndRoute([
     "revision": "0f282d64b0fb306daf12050e812d6a19"
   }
 ]);
+
+self.addEventListener('sync', function(event) {
+  console.log('[Service Worker] Background syncing', event)
+  if (event.tag === 'sync-new-posts') {
+    console.log('[Service Worker] Syncing new posts');
+    event.waitUntil(
+      readAllData('sync-posts')
+        .then(data => {
+          for (var dt of data) {
+            var postData = new FormData();
+            postData.append('id', dt.id);
+            postData.append('title', dt.title);
+            postData.append('location', dt.location);
+            postData.append('file', dt.picture, dt.id + '.png');
+            postData.append('rawLocationLat', dt.rawLocation.lat);
+            postData.append('rawLocationLng', dt.rawLocation.lng);
+            fetch('https://us-central1-try-pwa-73a1a.cloudfunctions.net/storePostData', {
+              method: 'POST',
+              body: postData
+            })
+            .then(res => {
+              console.log('Sent data', res);
+              if (res.ok) {
+                res.json()
+                  .then(function(resData) {
+                    deleteItemFromData('sync-posts', resData.id);
+                  })
+              }
+            })
+            .catch(err => {
+              console.log('Error while sending data', err);
+            })
+          }
+        })
+    );
+  }
+})
+
+self.addEventListener('notificationclick', function(event) {
+  var notification = event.notification;
+  var action = event.action;
+
+  console.log(notification);
+  if (action === 'confirm') {
+    console.log('Confirm was choosen');
+    notification.close();
+  } else {
+    console.log(action);
+    event.waitUntil(
+      clients.matchAll()
+        .then(function(clis) {
+          var client = clis.find(function(c) {
+            return c.visibilityState === 'visible';
+          });
+
+          if (client !== undefined) {
+            client.navigate(notification.data.url);
+            client.focus();
+          } else {
+            clients.openWindow(notification.data.url);
+          }
+          notification.close();
+        })
+    )
+  }
+});
+
+self.addEventListener('notificationclose', function(event) {
+  console.log('Notification was closed', event);
+});
+
+self.addEventListener('push', function(event) {
+  console.log('Push Notification received!', event);
+  var data = {title: 'New!', content: 'Something new happended!', openUrl: '/'};
+  if (event.data) {
+    data = JSON.parse(event.data.text());
+  }
+
+  var options = {
+    body: data.content,
+    icon: '/src/images/icons/app-icon-96x96.png',
+    badge: '/src/images/icons/app-icon-96x96.png',
+    data: {
+      url: data.openUrl
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  )
+});
