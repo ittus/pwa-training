@@ -1,0 +1,15 @@
+{
+  "name": "firebase-cloud-messaging",
+  "version": "0.0.1",
+  "description": "Simple test firebase cloud messaging",
+  "main": "index.js",
+  "repository": "https://github.com/ittus/pwa-training",
+  "author": "Vu Minh Thang",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^0.11.1"
+  },
+  "scripts": {
+    "dev": "http-server -p 3000"
+  }
+}
